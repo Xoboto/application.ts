@@ -7,7 +7,7 @@ import { App, AppView, Register } from '../../src';
 /**
  * Home Page - Simple welcome page
  */
-@Register
+@Register('home-page')
 class HomePage extends AppView {
     template(): string {
         return /*html*/`

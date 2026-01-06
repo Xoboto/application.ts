@@ -116,7 +116,7 @@ class State {
     }
 }
 
-@Register
+@Register('app-data-table')
 export class AppDataTable extends AppView {
     template(): string {
         return template;

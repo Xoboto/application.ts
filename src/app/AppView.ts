@@ -108,9 +108,16 @@ export abstract class AppView<TState extends AppViewState = AppViewState> extend
 
     /**
      * Get the custom element tag name for this class
-     * Converts class name to kebab-case (e.g., HomeView -> home-view)
+     * Uses explicit tagName property or falls back to class name conversion
+     * To prevent minification issues, define static tagName property in your class
      */
     static getTagName(): string {
+        // Use explicit tagName if provided (prevents minification issues)
+        if ((this as any).tagName && typeof (this as any).tagName === 'string') {
+            return (this as any).tagName;
+        }
+        
+        // Fallback to class name conversion (may break with minification)
         return this.name
             .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
             .toLowerCase();
@@ -327,7 +334,26 @@ export abstract class AppView<TState extends AppViewState = AppViewState> extend
     onParamsChanged?(newParams: RouteParams, oldParams: RouteParams): void | Promise<void>;
 }
 
-export function Register(target: any) : any {
-    target.register();
-    return target;
+/**
+ * Decorator to register a view as a custom element
+ * Optionally accepts a custom tag name to prevent minification issues
+ * 
+ * @example
+ * @Register() // Auto-generates tag name from class name
+ * @Register('my-component') // Explicit tag name (recommended for production)
+ */
+export function Register(tagName?: string) : any {
+    return function(target: any) {
+        // Use provided tag name or generate from class name
+        if (tagName) {
+            target.tagName = tagName;
+        } else if (!target.tagName) {
+            // Fallback to class name conversion (may fail with minification)
+            target.tagName = target.name
+                .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+                .toLowerCase();
+        }
+        target.register();
+        return target;
+    };
 }

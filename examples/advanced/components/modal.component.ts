@@ -198,7 +198,7 @@ class State {
     };
 }
 
-@Register
+@Register('app-modal')
 export class AppModal extends AppView {
     constructor() {
         super({ useShadowDOM: true });

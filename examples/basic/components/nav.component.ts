@@ -35,7 +35,7 @@ class State {
     }
 }
 
-@Register
+@Register('navigation-bar')
 export class NavigationBar extends AppView {
     template(): string {
         return template;

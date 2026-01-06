@@ -31,7 +31,7 @@ export interface ErrorState {
     dismissible: boolean;
 }
 
-@Register
+@Register('app-error-message')
 export class AppErrorMessage extends AppView {
     template(): string {
         return template;

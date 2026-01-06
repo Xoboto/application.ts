@@ -89,7 +89,7 @@ class State {
     viewComments: (ev: Event, item: any) => void = (ev: Event, item: any) => {};
 }
 
-@Register
+@Register('user-detail-page')
 export class UserDetailPage extends AppView {
     private userService!: UserService;
     private postService!: PostService;

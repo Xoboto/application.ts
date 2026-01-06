@@ -15,7 +15,7 @@ class State {
     message: string = '';
 }
 
-@Register
+@Register('app-loading-spinner')
 export class AppLoadingSpinner extends AppView {
     template(): string {
         return template;

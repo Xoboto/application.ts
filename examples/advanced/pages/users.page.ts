@@ -47,7 +47,7 @@ class State {
     refresh: () => void = () => {};
 }
 
-@Register
+@Register('users-page')
 export class UsersPage extends AppView {
     private userService!: UserService;
     private unsubscribe?: () => void;

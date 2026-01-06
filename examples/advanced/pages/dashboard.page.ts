@@ -113,7 +113,7 @@ class State {
     navigateToPost: (ev: Event, item: any) => void = (ev: Event, item: any) => {};
 }
 
-@Register
+@Register('dashboard-page')
 export class DashboardPage extends AppView {
     private userService!: UserService;
     private postService!: PostService;

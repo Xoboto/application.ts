@@ -75,7 +75,7 @@ class State {
     };
 }
 
-@Register
+@Register('login-page')
 export class LoginPage extends AppView {
     private authService!: AuthService;
 

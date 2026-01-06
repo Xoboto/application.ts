@@ -91,7 +91,7 @@ class State {
     handleLogout: () => void = () => {};
 }
 
-@Register
+@Register('advanced-layout')
 export class AdvancedLayout extends AppView {
     private authService!: AuthService;
     private unsubscribe?: () => void;
