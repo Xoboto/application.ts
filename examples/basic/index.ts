@@ -1,6 +1,6 @@
 /**
  * Examples Application Entry Point
- * Demonstrates the usage of App.Ts framework with layouts
+ * Demonstrates the usage of Application.Ts framework with layouts
  */
 
 import { App } from '../../src';
@@ -35,4 +35,4 @@ app.router
 // Start the application
 app.start();
 
-console.log('🚀 App.Ts Examples loaded successfully with DefaultLayout!');
+console.log('🚀 Application.Ts Examples loaded successfully with DefaultLayout!');

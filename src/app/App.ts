@@ -20,7 +20,7 @@ type ViewConstructor = new () => AppView<any>;
  * 
  * @example
  * ```typescript
- * import { App } from 'app.ts';
+ * import { App } from 'application.ts';
  * import { HomeView, AboutView, NotFoundView } from './views';
  * 
  * const app = new App('#root');

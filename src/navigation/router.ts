@@ -4,7 +4,7 @@ import { NavigationEvents } from './types';
 
 /**
  * Router class for managing navigation and route mapping
- * Emits events for App.ts to handle view rendering via StackView
+ * Emits events for Application.ts to handle view rendering via StackView
  */
 export class Router extends EventTarget {
     private routes: Map<string, { route: Route; handler: RouteHandler }> = new Map();
@@ -148,7 +148,7 @@ export class Router extends EventTarget {
             window.history.pushState({ path: fullPath }, '', fullPath);
         }
 
-        // Emit navigation event for App.ts to handle
+        // Emit navigation event for Application.ts to handle
         this.emitNavigation(routePath, params, handler, route.options.meta);
     }
 

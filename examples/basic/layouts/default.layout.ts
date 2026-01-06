@@ -17,7 +17,7 @@ const template = /*html*/`
     </main>
     
     <footer class="layout-footer" style="text-align: center; padding: 2rem; background: white; margin-top: 2rem; border-top: 1px solid var(--border-color);">
-        <p>© {{ year }} {{ appName }} - Built with App.Ts</p>
+        <p>© {{ year }} {{ appName }} - Built with Application.Ts</p>
     </footer>
 </div>`;
 

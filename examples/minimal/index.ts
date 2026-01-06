@@ -1,5 +1,5 @@
 /**
- * Minimal Example - The simplest App.Ts application
+ * Minimal Example - The simplest Application.Ts application
  */
 
 import { App, AppView, Register } from '../../src';
@@ -23,7 +23,7 @@ class HomePage extends AppView {
 
     state() {
         return {
-            title: '⚡ Minimal App.Ts',
+            title: '⚡ Minimal Application.Ts',
             message: 'The smallest possible application - just one page with state!',
             count: 0,
             increment: () => {
@@ -42,4 +42,4 @@ app.router
 
 app.start();
 
-console.log('⚡ Minimal App.Ts loaded!');
+console.log('⚡ Minimal Application.Ts loaded!');

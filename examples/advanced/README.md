@@ -1,6 +1,6 @@
 # Advanced Example
 
-A full-featured SPA demonstrating production-ready patterns with App.Ts framework.
+A full-featured SPA demonstrating production-ready patterns with Application.Ts framework.
 
 ## Features
 
@@ -162,7 +162,7 @@ examples/dist/advanced/
 
 ## Technologies
 
-- **App.Ts**: SPA framework (zero dependencies)
+- **Application.Ts**: SPA framework (zero dependencies)
 - **Template.Ts**: Reactive templating
 - **StackView.Ts**: View transitions
 - **TypeScript**: Type safety

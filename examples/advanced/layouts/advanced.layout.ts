@@ -61,7 +61,7 @@ const template = /*html*/`
         </main>
         
         <footer class="app-footer">
-            <p>© {{ new Date().getFullYear() }} Advanced App. Built with App.Ts</p>
+            <p>© {{ new Date().getFullYear() }} Advanced App. Built with Application.Ts</p>
         </footer>
     </div>
 </div>`;

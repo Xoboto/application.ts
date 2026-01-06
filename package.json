@@ -1,5 +1,5 @@
 {
-  "name": "app.ts",
+  "name": "application.ts",
   "version": "1.0.0",
   "description": "Simplified Web SPA app framework with vanilla JavaScript and CSS",
   "type": "module",
@@ -17,7 +17,9 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "example": "npm run build && vite examples --open",
+    "example:build": "npm run build && vite build --config vite.config.ts"
   },
   "keywords": [
     "spa",

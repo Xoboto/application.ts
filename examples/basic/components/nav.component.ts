@@ -22,7 +22,7 @@ const template = /*html*/`
 </nav>`;
 
 class State {
-    brand: string = 'App.Ts';
+    brand: string = 'Application.Ts';
     currentPath: string = window.location.pathname;
     links: Array<{ path: string; label: string }> = [
         { path: '/', label: 'Home' },
