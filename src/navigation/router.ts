@@ -10,6 +10,10 @@ export class Router extends EventTarget {
     private routes: Map<string, { route: Route; handler: RouteHandler }> = new Map();
     private notFoundHandler?: RouteHandler;
     private isInitialized: boolean = false;
+    private basePath: string = '';
+    private _currentPath: string = '/';
+    private _currentParams: RouteParams = {};
+    private _currentMeta?: Record<string, any>;
 
     constructor() {
         super();
@@ -55,6 +59,24 @@ export class Router extends EventTarget {
     }
 
     /**
+     * Set the base path for all routes
+     * @param base - Base path (e.g., '/basic', '/app')
+     * @returns The router instance for chaining
+     */
+    setBasePath(base: string): this {
+        // Normalize: ensure starts with / and no trailing /
+        this.basePath = base.replace(/\/$/, '').replace(/^(?!\/)/, '/');
+        return this;
+    }
+
+    /**
+     * Get the current base path
+     */
+    getBasePath(): string {
+        return this.basePath;
+    }
+
+    /**
      * Initialize the router and handle the current path
      */
     start(): void {
@@ -63,21 +85,39 @@ export class Router extends EventTarget {
             return;
         }
         
+        // Auto-detect base path from <base> tag if not set
+        if (!this.basePath) {
+            const baseTag = document.querySelector('base[href]') as HTMLBaseElement;
+            if (baseTag) {
+                const baseHref = baseTag.getAttribute('href') || '';
+                // Extract path from href (could be full URL or relative path)
+                try {
+                    const url = new URL(baseHref, window.location.origin);
+                    this.basePath = url.pathname.replace(/\/$/, '');
+                } catch {
+                    this.basePath = baseHref.replace(/\/$/, '');
+                }
+            }
+        }
+        
         this.isInitialized = true;
         this.handleRouteChange();
     }
 
     /**
      * Navigate to a specific path
-     * @param path - The path to navigate to
+     * @param path - The path to navigate to (relative to basePath)
      * @param replaceState - If true, replaces current history entry instead of pushing
      */
     async navigate(path: string, replaceState: boolean = false): Promise<void> {
+        // Strip basePath if present to get route path
+        const routePath = this.stripBasePath(path);
+        
         // Find matching route
-        const match = this.findRoute(path);
+        const match = this.findRoute(routePath);
 
         if (!match) {
-            this.emitNotFound(path);
+            this.emitNotFound(routePath);
             return;
         }
 
@@ -98,28 +138,46 @@ export class Router extends EventTarget {
             return;
         }
 
+        // Add basePath to create full URL
+        const fullPath = this.addBasePath(routePath);
+        
         // Update browser history
         if (replaceState) {
-            window.history.replaceState({ path }, '', path);
+            window.history.replaceState({ path: fullPath }, '', fullPath);
         } else {
-            window.history.pushState({ path }, '', path);
+            window.history.pushState({ path: fullPath }, '', fullPath);
         }
 
         // Emit navigation event for App.ts to handle
-        this.emitNavigation(path, params, handler, route.options.meta);
+        this.emitNavigation(routePath, params, handler, route.options.meta);
     }
 
     /**
-     * Get the current path
+     * Get the current path (route pattern)
      */
     get currentPath(): string {
-        return window.location.pathname;
+        return this._currentPath;
+    }
+
+    /**
+     * Get the current route parameters
+     */
+    get currentParams(): RouteParams {
+        return this._currentParams;
+    }
+
+    /**
+     * Get the current route metadata
+     */
+    get currentMeta(): Record<string, any> | undefined {
+        return this._currentMeta;
     }
 
     /**
      * Find a route that matches the given path
      */
     private findRoute(path: string): { route: Route; handler: RouteHandler; params: RouteParams } | null {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [_, { route, handler }] of this.routes) {
             const params = route.match(path);
             if (params !== null) {
@@ -133,13 +191,48 @@ export class Router extends EventTarget {
      * Handle route change (from popstate or initial load)
      */
     private async handleRouteChange(): Promise<void> {
-        await this.navigate(this.currentPath, true);
+        const routePath = this.stripBasePath(window.location.pathname);
+        await this.navigate(routePath, true);
+    }
+
+    /**
+     * Strip base path from a full path
+     */
+    private stripBasePath(fullPath: string): string {
+        if (!this.basePath) {
+            return fullPath;
+        }
+        
+        if (fullPath.startsWith(this.basePath)) {
+            const stripped = fullPath.slice(this.basePath.length);
+            return stripped || '/';
+        }
+        
+        return fullPath;
+    }
+
+    /**
+     * Add base path to a route path
+     */
+    private addBasePath(routePath: string): string {
+        if (!this.basePath) {
+            return routePath;
+        }
+        
+        // Ensure route path starts with /
+        const normalizedPath = routePath.startsWith('/') ? routePath : '/' + routePath;
+        return this.basePath + normalizedPath;
     }
 
     /**
      * Emit navigation event
      */
     private emitNavigation(path: string, params: RouteParams, handler: RouteHandler, meta?: Record<string, any>): void {
+        // Store current navigation state
+        this._currentPath = path;
+        this._currentParams = params;
+        this._currentMeta = meta;
+
         const detail: NavigationEventDetail = {
             path,
             params,
@@ -156,6 +249,11 @@ export class Router extends EventTarget {
      */
     private emitNotFound(path: string): void {
         if (this.notFoundHandler) {
+            // Store current navigation state
+            this._currentPath = path;
+            this._currentParams = {};
+            this._currentMeta = undefined;
+
             const detail: NavigationEventDetail = {
                 path,
                 params: {},
@@ -172,7 +270,7 @@ export class Router extends EventTarget {
      * Generate a URL for a route with parameters
      * @param path - The route path pattern
      * @param params - Parameters to inject
-     * @returns The generated URL or null if route not found
+     * @returns The generated URL (with basePath) or null if route not found
      */
     generateUrl(path: string, params: RouteParams = {}): string | null {
         const routeEntry = this.routes.get(path);
@@ -180,6 +278,7 @@ export class Router extends EventTarget {
             return null;
         }
 
-        return routeEntry.route.generate(params);
+        const routePath = routeEntry.route.generate(params);
+        return this.addBasePath(routePath);
     }
 }

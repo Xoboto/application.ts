@@ -1,11 +1,13 @@
 import StackView from 'stackview.ts';
 import { Router } from '../navigation/router';
-import { NavigationEvents, type NavigationEventDetail, type RouteParams } from '../navigation/types';
+import { NavigationEvents, type NavigationEventDetail } from '../navigation/types';
 import type { AppView } from './AppView';
 
 // Force StackView to be included in the bundle by using it
 // This ensures the custom element is registered when the module loads
-const _StackView = StackView;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _stackView = StackView;
 
 /**
  * View constructor type
@@ -39,7 +41,26 @@ export class App {
     private layoutRegistry: Map<string, ViewConstructor> = new Map();
     private currentViewInstance: AppView<any> | null = null;
     private currentLayoutInstance: AppView<any> | null = null;
+    private currentRoutePath: string | null = null;
     private defaultLayout: string | null = null;
+
+    /**
+     * Get the App instance from any element by traversing up the DOM tree
+     * @param element - Any HTMLElement in the app
+     * @returns App instance or null if not found
+     */
+    static fromElement(element: HTMLElement | null): App | null {
+        let current = element;
+        
+        while (current) {
+            if ((current as any).__app__) {
+                return (current as any).__app__;
+            }
+            current = current.parentElement;
+        }
+        
+        return null;
+    }
 
     constructor(rootSelector?: string) {
         this.router = new Router();
@@ -126,6 +147,9 @@ export class App {
 
         this.rootElement = element as HTMLElement;
 
+        // Attach app instance to root element
+        (this.rootElement as any).__app__ = this;
+
         // Create StackView if it doesn't exist
         if (!this.stackView) {
             // Create or use existing stack-view element
@@ -184,7 +208,10 @@ export class App {
      * Handle navigation event from router
      */
     private async handleNavigation(event: CustomEvent<NavigationEventDetail>): Promise<void> {
-        const { handler, params, meta } = event.detail;
+        const { handler, params, meta, path } = event.detail;
+
+        // Store the current route path pattern
+        this.currentRoutePath = this.getRoutePattern(path);
 
         // Resolve view class from handler (can be class constructor or string)
         const ViewClass = this.resolveViewClass(handler);
@@ -206,9 +233,6 @@ export class App {
 
         // Create view instance
         const viewInstance = new ViewClass();
-
-        // Initialize with route parameters
-        await viewInstance.initialize(params);
 
         // Store current view instance
         this.currentViewInstance = viewInstance;
@@ -238,7 +262,6 @@ export class App {
         if (!this.currentLayoutInstance || this.currentLayoutInstance.constructor !== LayoutClass) {
             // Create new layout instance
             const layoutInstance = new LayoutClass();
-            await layoutInstance.initialize({});
             this.currentLayoutInstance = layoutInstance;
 
             // Show layout in StackView
@@ -313,9 +336,6 @@ export class App {
         // Create view instance
         const viewInstance = new ViewClass();
 
-        // Initialize without parameters
-        await viewInstance.initialize({});
-
         // Store current view instance
         this.currentViewInstance = viewInstance;
 
@@ -324,10 +344,32 @@ export class App {
     }
 
     /**
+     * Get the route pattern that matches the given path
+     */
+    public getRoutePattern(path: string): string | null {
+        // Iterate through all registered routes to find the matching pattern
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (const [pattern, _] of (this.router as any).routes) {
+            const route = (this.router as any).routes.get(pattern).route;
+            if (route.match(path) !== null) {
+                return pattern;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Get the current view instance
      */
     get currentView(): AppView<any> | null {
         return this.currentViewInstance;
+    }
+
+    /**
+     * Get the current route pattern (e.g., '/user/:id')
+     */
+    get currentRoute(): string | null {
+        return this.currentRoutePath;
     }
 
     /**

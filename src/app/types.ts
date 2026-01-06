@@ -58,6 +58,13 @@ export interface AppViewOptions {
      * Default: true
      */
     autoUpdate?: boolean;
+
+    /**
+     * Whether to use Shadow DOM for the template
+     * When true, template is rendered in shadow root (enables <slot> to work properly)
+     * Default: false
+     */
+    useShadowDOM?: boolean;
 }
 
 /**

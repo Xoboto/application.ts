@@ -1,10 +1,10 @@
 import { TemplateBinder } from 'template.ts';
 import type { RouteParams } from '../navigation/types';
+import { App } from './App';
 import type { 
-    AppViewLifecycle, 
-    AppViewOptions, 
-    AppViewState, 
-    TemplateFunction 
+    AppViewLifecycle,
+    AppViewOptions,
+    AppViewState
 } from './types';
 
 /**
@@ -43,8 +43,8 @@ import type {
 export abstract class AppView<TState extends AppViewState = AppViewState> extends HTMLElement implements AppViewLifecycle {
     protected binder: TemplateBinder | null = null;
     protected _state: TState | null = null;
-    protected _params: RouteParams = {};
     protected _options: AppViewOptions;
+    protected _root: HTMLElement | ShadowRoot;
     private _isInitialized: boolean = false;
 
     constructor(options?: AppViewOptions) {
@@ -53,8 +53,57 @@ export abstract class AppView<TState extends AppViewState = AppViewState> extend
         this._options = {
             transitionClass: 'transition-fade',
             autoUpdate: true,
+            useShadowDOM: false,
             ...options
         };
+
+        // Create shadow root if enabled
+        if (this._options.useShadowDOM) {
+            const shadow = this.attachShadow({ mode: 'open' });
+            shadow.innerHTML = this.template();
+            if (!shadow.firstElementChild || !(shadow.firstElementChild instanceof HTMLElement)) {
+                throw new Error('AppView template must have a single root element');
+            }
+            this._root = shadow.firstElementChild as HTMLElement;
+        } else {
+            this.innerHTML = this.template();
+            if (!this.firstElementChild || !(this.firstElementChild instanceof HTMLElement)) {
+                throw new Error('AppView template must have a single root element');
+            }
+            this._root = this.firstElementChild as HTMLElement;
+        }
+
+        // Eager initialization in constructor
+        this.initialize();
+    }
+
+    /**
+     * Render the view with route parameters
+     * Initializes the template and binds state
+     * @param params - Route parameters from the router
+     */
+    initialize(): void {
+        if (this._isInitialized) {
+            return;
+        }
+
+        // Add app-view class
+        this.classList.add('app-view');
+        
+        // Initialize state
+        this._state = this.state();
+
+        // Bind template using container
+        this.binder = new TemplateBinder(
+            this._root,
+            this._state,
+            this._options.transitionClass
+        );
+        this.binder.autoUpdate = this._options.autoUpdate ?? true;
+
+        this.binder.bind();
+
+        this._isInitialized = true;
     }
 
     /**
@@ -106,7 +155,27 @@ export abstract class AppView<TState extends AppViewState = AppViewState> extend
      * Get the route parameters passed to this view
      */
     protected get params(): RouteParams {
-        return this._params;
+        return this.app?.router?.currentParams || {};
+    }
+
+    /**
+     * Get the App instance by traversing up the DOM tree
+     */
+    protected get app(): App | null {
+        return App.fromElement(this);
+    }
+
+    /**
+     * Navigate to a specific path using the app's router
+     * @param path - The path to navigate to
+     */
+    protected navigate(path: string): void {
+        const appInstance = this.app;
+        if (appInstance) {
+            appInstance.navigate(path);
+        } else {
+            console.warn('Cannot navigate: App instance not found');
+        }
     }
 
     /**
@@ -169,56 +238,14 @@ export abstract class AppView<TState extends AppViewState = AppViewState> extend
     }
 
     /**
-     * Render the view with route parameters
-     * Initializes the template and binds state
-     * @param params - Route parameters from the router
-     */
-    async initialize(params: RouteParams = {}): Promise<void> {
-        if (this._isInitialized) {
-            return;
-        }
-
-        this._params = params;
-
-        // Add app-view class
-        this.classList.add('app-view');
-        
-        // Set template HTML
-        this.innerHTML = this.template();
-
-        // Initialize state
-        this._state = this.state();
-
-        // Bind template using this element as container
-        this.binder = new TemplateBinder(
-            this,
-            this._state,
-            this._options.transitionClass
-        );
-        this.binder.autoUpdate = this._options.autoUpdate ?? true;
-
-        // Call before mount hook
-        if (this.onBeforeMount) {
-            await this.onBeforeMount();
-        }
-
-        this.binder.bind();
-
-        this._isInitialized = true;
-    }
-
-    /**
      * Update route parameters and re-trigger initialization logic
      * Used when navigating to the same view with different parameters
      * @param params - New route parameters
      */
     async updateParams(params: RouteParams = {}): Promise<void> {
-        const oldParams = { ...this._params };
-        this._params = params;
-
         // Call the parameter changed hook with old and new params
         if (this.onParamsChanged) {
-            await this.onParamsChanged(params, oldParams);
+            await this.onParamsChanged(params, this.params);
         }
 
         // Update the view if needed
@@ -231,9 +258,9 @@ export abstract class AppView<TState extends AppViewState = AppViewState> extend
      * StackView lifecycle: called when view is about to be shown
      */
     async stackViewShowing(): Promise<void> {
-        // Initialize if not already done
-        if (!this._isInitialized) {
-            await this.initialize();
+        // Call before mount hook
+        if (this.onBeforeMount) {
+            await this.onBeforeMount();
         }
     }
 
@@ -300,7 +327,7 @@ export abstract class AppView<TState extends AppViewState = AppViewState> extend
     onParamsChanged?(newParams: RouteParams, oldParams: RouteParams): void | Promise<void>;
 }
 
-export function Register(target: any) {
+export function Register(target: any) : any {
     target.register();
     return target;
 }

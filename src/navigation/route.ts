@@ -1,4 +1,4 @@
-import type { RouteParams, RouteOptions, RouteDefinition } from './types';
+import type { RouteParams, RouteOptions } from './types';
 
 /**
  * Represents a route with path pattern matching and parameter extraction
