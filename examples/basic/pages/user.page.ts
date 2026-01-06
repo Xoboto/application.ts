@@ -1,4 +1,4 @@
-import { AppViewState, AppView } from '../../src';
+import { AppViewState, AppView } from '../../../src';
 
 /**
  * User Profile Page View - Demonstrates route parameters
@@ -106,14 +106,6 @@ export class UserPage extends AppView {
         return new State(this);
     }
 
-    async onBeforeMount() {
-        // Get user ID from route parameters
-        this.viewState.userId = this.params.id || 'unknown';
-        
-        // Simulate API call to fetch user data
-        await this.viewState.fetchUser(this.viewState.userId);
-    }
-
     async onParamsChanged(newParams: any, oldParams: any) {
         // Called when navigating from /user/1 to /user/2
         console.log(`User ID changed from ${oldParams.id} to ${newParams.id}`);
@@ -126,6 +118,10 @@ export class UserPage extends AppView {
     }
 
     async onMounted() {
-        console.log(`User page mounted for user ID: ${this.viewState.userId}`);
+        // Get user ID from route parameters
+        this.viewState.userId = this.params.id || 'unknown';
+        
+        // Simulate API call to fetch user data
+        await this.viewState.fetchUser(this.viewState.userId);
     }
 }

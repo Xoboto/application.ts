@@ -1,4 +1,4 @@
-import { AppView } from '../../src';
+import { AppView } from '../../../src';
 import '../components/nav.component';
 
 /**

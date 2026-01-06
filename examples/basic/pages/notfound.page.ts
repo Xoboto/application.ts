@@ -1,4 +1,4 @@
-import { AppView, AppViewState } from '../../src';
+import { AppView, AppViewState } from '../../../src';
 
 /**
  * 404 Not Found Page View

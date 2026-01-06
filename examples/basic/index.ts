@@ -3,7 +3,7 @@
  * Demonstrates the usage of App.Ts framework with layouts
  */
 
-import { App } from '../src';
+import { App } from '../../src';
 
 // Import layouts
 import { DefaultLayout } from './layouts/default.layout';

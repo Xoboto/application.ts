@@ -1,4 +1,4 @@
-import { AppView, Register } from '../../src';
+import { AppView, Register } from '../../../src';
 
 /**
  * Navigation Component
@@ -11,11 +11,9 @@ const template = /*html*/`
         <a href="/" class="nav-brand">{{ brand }}</a>
         <ul class="nav-links">
             <li @for="links">
-                <a 
-                    @att:href="item.path" 
-                    class="nav-link"
-                    @att:class="isActive(item.path) ? 'nav-link active' : 'nav-link'"
-                >
+                <a @att:href="item.path" 
+                   @att:class="isActive(item.path) ? 'nav-link active' : 'nav-link'"
+                   class="nav-link">
                     {{ item.label }}
                 </a>
             </li>
