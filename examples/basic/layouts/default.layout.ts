@@ -1,4 +1,4 @@
-import { AppView } from '../../../src';
+import { AppView, Register } from '../../../src';
 import '../components/nav.component';
 
 /**
@@ -21,6 +21,7 @@ const template = /*html*/`
     </footer>
 </div>`;
 
+@Register('default-layout')
 export class DefaultLayout extends AppView {
     template(): string {
         return template;

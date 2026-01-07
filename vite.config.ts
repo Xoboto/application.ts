@@ -13,6 +13,7 @@ export default defineConfig({
     outDir: '../examples/dist',
     emptyOutDir: true,
     sourcemap: true,
+    minify: 'terser',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'examples/index.html'),
@@ -21,6 +22,15 @@ export default defineConfig({
         advanced: resolve(__dirname, 'examples/advanced/index.html'),
       },
     },
+    terserOptions: {
+      compress: {
+        keep_classnames: /View$|Layout$|Page$|Component$/,
+      },
+      mangle: {
+        keep_classnames: /View$|Layout$|Page$|Component$/,
+        reserved: ['AppView'],
+      },
+    }
   },
   server: {
     port: 3000,
