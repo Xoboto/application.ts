@@ -1,6 +1,6 @@
 {
   "name": "application.ts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simplified Web SPA app framework with vanilla JavaScript and CSS",
   "type": "module",
   "main": "src/index.ts",
@@ -38,6 +38,20 @@
   ],
   "author": "Xoboto Contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xoboto/application.ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Xoboto/application.ts/issues"
+  },
+  "homepage": "https://github.com/Xoboto/application.ts#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "stackview.ts": "^1.0.1",
     "template.ts": "^2.0.0"

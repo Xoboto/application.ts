@@ -2,6 +2,8 @@
 
 A lightweight, dependency-free except template.ts and stackview.ts TypeScript framework for building single-page applications (SPAs) with pure vanilla JavaScript and CSS. No build tools required, just modern web standards.
 
+**[📺 Live Examples →](http://app.dev.xoboto.com/)**
+
 ## What is Application.Ts?
 
 Application.Ts is a minimalist SPA framework that combines:
@@ -292,6 +294,8 @@ Use in templates:
 ```
 
 ## Examples
+
+**[🚀 View Live Examples](http://app.dev.xoboto.com/)**
 
 Explore the `/examples` folder for complete working examples:
 
