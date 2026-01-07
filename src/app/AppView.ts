@@ -336,24 +336,62 @@ export abstract class AppView<TState extends AppViewState = AppViewState> extend
 
 /**
  * Decorator to register a view as a custom element
- * Optionally accepts a custom tag name to prevent minification issues
+ * Supports both @Register and @Register('tag-name') syntax
  * 
  * @example
- * @Register() // Auto-generates tag name from class name
+ * @Register // Auto-generates tag name from class name
+ * @Register() // Same as above
  * @Register('my-component') // Explicit tag name (recommended for production)
  */
-export function Register(tagName?: string) : any {
-    return function(target: any) {
+export function Register(tagNameOrTarget?: string | any) : any {
+    // Helper function to do the actual registration
+    const registerClass = (target: any, customTagName?: string) => {
+        if (!target) {
+            console.warn('Register decorator: target is undefined');
+            return target;
+        }
+        
         // Use provided tag name or generate from class name
-        if (tagName) {
-            target.tagName = tagName;
+        if (customTagName) {
+            target.tagName = customTagName;
         } else if (!target.tagName) {
             // Fallback to class name conversion (may fail with minification)
             target.tagName = target.name
                 .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
                 .toLowerCase();
         }
-        target.register();
+        
+        // Check if register method exists (for safety with inheritance)
+        if (typeof target.register === 'function') {
+            try {
+                target.register();
+            } catch (error) {
+                console.warn('Register decorator: failed to call register method', error);
+            }
+        } else {
+            // Fallback: manually register the element
+            try {
+                const elementTagName = target.tagName || target.name
+                    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+                    .toLowerCase();
+                if (!customElements.get(elementTagName)) {
+                    customElements.define(elementTagName, target);
+                }
+            } catch (error) {
+                console.warn('Register decorator: failed to register custom element', error);
+            }
+        }
+        
         return target;
+    };
+    
+    // Check if used as @Register (without parentheses) - target is passed directly
+    if (typeof tagNameOrTarget === 'function') {
+        return registerClass(tagNameOrTarget);
+    }
+    
+    // Used as @Register() or @Register('tag-name') - return decorator function
+    return function(target: any) {
+        return registerClass(target, tagNameOrTarget);
     };
 }

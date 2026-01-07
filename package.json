@@ -1,11 +1,19 @@
 {
   "name": "application.ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simplified Web SPA app framework with vanilla JavaScript and CSS",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
-    "src/",
     "dist/",
     "README.md",
     "LICENSE"

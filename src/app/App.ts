@@ -86,8 +86,10 @@ export class App {
      * @param viewClass - The AppView class constructor
      */
     registerView(handler: string, viewClass: ViewConstructor): this {
-        // Auto-register the custom element
-        (viewClass as any).register();
+        // Auto-register the custom element if register method exists
+        if (typeof (viewClass as any).register === 'function') {
+            (viewClass as any).register();
+        }
         this.viewRegistry.set(handler, viewClass);
         return this;
     }
@@ -109,8 +111,10 @@ export class App {
      * @param layoutClass - The AppView layout class constructor
      */
     registerLayout(handler: string, layoutClass: ViewConstructor): this {
-        // Auto-register the custom element
-        (layoutClass as any).register();
+        // Auto-register the custom element if register method exists
+        if (typeof (layoutClass as any).register === 'function') {
+            (layoutClass as any).register();
+        }
         this.layoutRegistry.set(handler, layoutClass);
         return this;
     }
