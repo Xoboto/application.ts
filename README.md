@@ -154,10 +154,16 @@ export class MyComponent extends AppView {
 Wrap views with shared layouts:
 
 ```typescript
+import { DefaultLayout } from './layouts/default.layout';
+
+// Register and set default layout
+app.registerLayout('default', DefaultLayout);
+app.setDefaultLayout('default');
+
+// Or specify layout per route
 app.router
     .map('/', HomeView)
-    .map('/about', AboutView)
-    .setLayout(DefaultLayout);
+    .map('/about', AboutView, { layout: 'default' });
 ```
 
 ### 🎯 View Lifecycle
@@ -317,10 +323,18 @@ app.start() // Start the application
 
 ```typescript
 router.map(path: string, view: typeof AppView, options?: RouteOptions)
-router.setLayout(layout: typeof AppView)
 router.notFound(view: typeof AppView)
 router.navigate(path: string)
 router.start()
+```
+
+### App
+
+```typescript
+app.registerLayout(handler: string, layoutClass: typeof AppView)
+app.setDefaultLayout(handler: string)
+app.registerView(handler: string, viewClass: typeof AppView)
+app.start()
 ```
 
 ### AppView
