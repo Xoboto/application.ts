@@ -57,8 +57,6 @@ jobs:
       with:
         name: Release ${{ github.ref_name }}
         body_path: release_body.md
-        files: |
-          dist/**
         draft: false
         prerelease: false
       env:
