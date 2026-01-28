@@ -1,5 +1,7 @@
 /**
- * Route parameters extracted from URL path
+ * Route parameters extracted from URL path and query string
+ * Path params come from :param patterns in routes
+ * Query params come from ?key=value in the URL
  */
 export type RouteParams = Record<string, string>;
 

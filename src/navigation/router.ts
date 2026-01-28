@@ -30,7 +30,7 @@ export class Router extends EventTarget {
 
             if (link && link.href.startsWith(window.location.origin) && !link.hasAttribute('target')) {
                 e.preventDefault();
-                this.navigate(link.pathname);
+                this.navigate(link.pathname + link.search);
             }
         });
     }
@@ -106,12 +106,15 @@ export class Router extends EventTarget {
 
     /**
      * Navigate to a specific path
-     * @param path - The path to navigate to (relative to basePath)
+     * @param path - The path to navigate to (relative to basePath), can include query string
      * @param replaceState - If true, replaces current history entry instead of pushing
      */
     async navigate(path: string, replaceState: boolean = false): Promise<void> {
+        // Split path and query string
+        const [pathPart, queryPart] = path.split('?');
+        
         // Strip basePath if present to get route path
-        const routePath = this.stripBasePath(path);
+        const routePath = this.stripBasePath(pathPart);
         
         // Find matching route
         const match = this.findRoute(routePath);
@@ -121,10 +124,16 @@ export class Router extends EventTarget {
             return;
         }
 
-        const { route, handler, params } = match;
+        const { route, handler, params: pathParams } = match;
+        
+        // Parse query string parameters
+        const queryParams = this.parseQueryParams(queryPart || '');
+        
+        // Merge path params and query params (query params can override path params)
+        const allParams = { ...pathParams, ...queryParams };
 
-        // Check route guard
-        const guardResult = await route.canEnter(params);
+        // Check route guard with merged params
+        const guardResult = await route.canEnter(allParams);
 
         if (guardResult === false) {
             // Navigation denied
@@ -139,7 +148,7 @@ export class Router extends EventTarget {
         }
 
         // Add basePath to create full URL
-        const fullPath = this.addBasePath(routePath);
+        const fullPath = this.addBasePath(routePath) + (queryPart ? '?' + queryPart : '');
         
         // Update browser history
         if (replaceState) {
@@ -148,8 +157,8 @@ export class Router extends EventTarget {
             window.history.pushState({ path: fullPath }, '', fullPath);
         }
 
-        // Emit navigation event for Application.ts to handle
-        this.emitNavigation(routePath, params, handler, route.options.meta);
+        // Emit navigation event for Application.ts to handle with merged params
+        this.emitNavigation(routePath, allParams, handler, route.options.meta);
     }
 
     /**
@@ -192,7 +201,8 @@ export class Router extends EventTarget {
      */
     private async handleRouteChange(): Promise<void> {
         const routePath = this.stripBasePath(window.location.pathname);
-        await this.navigate(routePath, true);
+        const fullPath = routePath + window.location.search;
+        await this.navigate(fullPath, true);
     }
 
     /**
@@ -280,5 +290,31 @@ export class Router extends EventTarget {
 
         const routePath = routeEntry.route.generate(params);
         return this.addBasePath(routePath);
+    }
+
+    /**
+     * Parse query string parameters from URL
+     * @param search - The query string (e.g., '?code=123&state=abc')
+     * @returns Object with query parameters
+     */
+    private parseQueryParams(search: string): RouteParams {
+        const params: RouteParams = {};
+        
+        if (!search || search.length <= 1) {
+            return params;
+        }
+
+        // Remove leading '?' if present
+        const queryString = search.startsWith('?') ? search.slice(1) : search;
+        
+        // Parse each parameter
+        queryString.split('&').forEach(param => {
+            const [key, value] = param.split('=');
+            if (key) {
+                params[decodeURIComponent(key)] = value ? decodeURIComponent(value) : '';
+            }
+        });
+
+        return params;
     }
 }

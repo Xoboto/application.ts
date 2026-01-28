@@ -163,7 +163,7 @@ app.setDefaultLayout('default');
 // Or specify layout per route
 app.router
     .map('/', HomeView)
-    .map('/about', AboutView, { layout: 'default' });
+    .map('/about', AboutView, { meta: { layout: 'default' } });
 ```
 
 ### 🎯 View Lifecycle
